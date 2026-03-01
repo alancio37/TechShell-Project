@@ -1,4 +1,4 @@
-Alancnio Young
+Alancio Young
 
 1. Group members: Alancio Young
 
@@ -56,4 +56,5 @@ Alancnio Young
                          formatted function wise (I researched all functions I used and     ones I did not wind up implementing, like the copy command, using this)
 
     5. chatgpt.com -> for significant help on commands I found harder to implement 
-                        (mainly chmod and the forking part for invalid inputs) as well as structuring and figuring out errors that I could not seem to fix myself 
+                        (mainly chmod and the forking part for invalid inputs) as well as structuring and figuring out errors that I could not seem to fix myself.
+                            For example: Although I eventually solved the error myself, when my program was having issues running my "exit" and "ls" commands, I would mainly ask commands with hypotheicals on why something could be happening given specific lines and when I could not figure that out, I would then just give it small snippets of my code and then go from there. 

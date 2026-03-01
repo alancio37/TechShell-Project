@@ -141,8 +141,8 @@ void fileRMV(char *filename){
     }
 }
 
+// Exit the terminal
 void exitCmd(){
-    // end the terminal
     exit(0);
 }
 
@@ -299,6 +299,7 @@ int commandExec(char *input){
     return 1;
 }
 
+// Loops that keeps the shell running
 void shell_loop(){
 
     char *input = NULL;
@@ -322,7 +323,7 @@ void shell_loop(){
 
 }
 
-// third input gives us the environment 
+// Main section that executes the program
 int main(){ 
 
     shell_loop(); 
