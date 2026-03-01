@@ -25,24 +25,35 @@ Alancnio Young
      4. cd <destination> (will move to specified directory)
 
     ls:
-     1. ls (will list the contents of the directory you're currently in)
+     5. ls (will list the contents of the directory you're currently in)
 
     chmod:
-     1. chmod <permission-numbers> (will change the file permission to whatever r, w, x number combination entered)
+     6. chmod <permission-numbers> (will change the file permission to whatever r, w, x number combination entered)
 
     pwd:
-     1. pwd (prints the current working directory)
+     7. pwd (prints the current working directory)
 
     mkdir:
-     1. mkdir <directory-name> (makes the specified directory in the current directory)
+     8. mkdir <directory-name> (makes the specified directory in the current directory)
 
     touch:
-     1. touch (makes a file in the current directory)
+     9. touch (makes a file in the current directory)
 
     rmdir:
-     1. rmdir <directory-name> (removes the specified directory from the current directory)
+     10. rmdir <directory-name> (removes the specified directory from the current directory)
 
     rm:
-     1. rm (removes the given file if it is in the current directory)
+     11. rm (removes the given file if it is in the current directory)
 
+6. Resources:
+    1. geeksforgeeks.org -> for function and implementation help (ex. chdir)
     
+    2. delftstack.com -> for function and implementation help (ex. getcwd)
+
+    3. iq.opengenius.org -> for function and implementation help (ex. ls)
+
+    4. w3schools.org -> for more information on how said bash commands work and how they're
+                         formatted function wise (I researched all functions I used and     ones I did not wind up implementing, like the copy command, using this)
+
+    5. chatgpt.com -> for significant help on commands I found harder to implement 
+                        (mainly chmod and the forking part for invalid inputs) as well as structuring and figuring out errors that I could not seem to fix myself 

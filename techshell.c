@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 
 // Function to remove the newline character at the end of the input string
@@ -59,8 +60,7 @@ void changeDRCIII(const char *spcdir){
     }
 }
 
-                    //////FINISH CD COMMANDS//////
-
+// List the contents of a directory
 void lsCom(const char *dir) {
 
     struct dirent *d;
@@ -102,31 +102,6 @@ void filePerms(char *modeStr, char *file){
     }
 }
 
-// Processes Function
-void filePRS(){
-
-}
-
-// Copy a file to a destination
-void fileCOPY(char *filename, char *destination){
-    char buffer[1024];
-    FILE *file = fopen(filename, "r");
-    FILE *goal = fopen(destination, "w");
-
-    if (file == NULL || goal == NULL){
-        perror("Invalid input\n");
-    }
-
-    size_t bytesRead;
-    while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0) {
-        fwrite(buffer, 1, bytesRead, goal);  // Write the data to the destination file
-    }
-
-    fclose(file);
-    fclose(goal);
-
-}
-
 // Create a file
 void fileCRT(char *filename){
     FILE *fp = fopen(filename, "a");
@@ -159,13 +134,12 @@ void makeDir(char *dirName){
     }
 }
 
-// Create a file
+// Remove a file
 void fileRMV(char *filename){
     if (remove(filename) == 0){
         printf("File removed\n");
     }
 }
-
 
 void exitCmd(){
     // end the terminal
@@ -173,14 +147,17 @@ void exitCmd(){
 }
 
 int commandExec(char *input){
-       // Strip the newline character before processing
+    // Strip the newline character before processing
     stripNewline(input);
 
+    // Parse the input from the argument to see
+    //  if the there is a typed command
+    //     *If nothing is typed, then the command is invalid
     char *command = strtok(input, " \n");
     if (command == NULL){
         printf("Invalid Command\n");
         return 0;
-    }
+    } 
 
     // If command string is pwd
     //  then run the getcwd function
@@ -189,6 +166,8 @@ int commandExec(char *input){
         return 1;
     }
 
+    // If the command enter is "ls" or
+    //  "ls <argument>"
     if (strcmp(command, "ls") == 0) {
         // Check for an argument for "ls"
         char *arg = strtok(NULL, " \n");  // Get the argument after "ls"
@@ -197,7 +176,7 @@ int commandExec(char *input){
         } else {
             lsCom(arg);  // List the contents of the directory passed as argument
         }
-        return 1;
+        return 1; // So fork
     }
 
     // If command is "exit" then run 
@@ -206,10 +185,8 @@ int commandExec(char *input){
     //      print the error message
     if (strcmp(command, "exit") == 0){
         exitCmd();
-        return 0;
-    } else {
-        printf("Error 2 (no such file or directory)\n");
-    }
+        return 1;
+    } 
 
     // If the "chmod <argument>" is entered
     //  then initiate the CHMOD function
@@ -219,9 +196,10 @@ int commandExec(char *input){
 
     if (mode && file) {
         filePerms(mode, file);
-    } else {
+        } else {
         printf("Invalid input for chmod\n");
-    }
+        }
+        return 1;
     }   
 
     // If "mkdir <file-name>" is entered,
@@ -234,6 +212,7 @@ int commandExec(char *input){
         } else {
             makeDir(arg);
         }
+        return 1;
     }
 
     // if "touch <filename.type> is entered,
@@ -246,6 +225,7 @@ int commandExec(char *input){
         } else {
             fileCRT(arg);
         }
+        return 1;
     }
 
     // If "rmdir <specified_directory>" is entered,
@@ -257,7 +237,8 @@ int commandExec(char *input){
             perror("Could not remove that directory\n");
         } else {
             dirRMV(arg);
-        }
+        }       
+        return 1;
     }
 
     // If "rm <file-name>" is entered, then remove that
@@ -270,20 +251,9 @@ int commandExec(char *input){
         } else {
             fileRMV(arg);
         }
+        return 1;
     }
 
-    // If "cp <file-name> <destination>" is entered, copy 
-    //  a file to the specified destination
-    if (strcmp(command, "cp") == 0){
-        char *dest = strtok(NULL, " \n");
-        char *file = strtok(NULL, " \n");
-
-        if (dest == NULL || file == NULL){
-            perror("One or more inputs were invalid\n");
-        } else{ 
-            fileCOPY(file, dest);
-        }
-    }
 
     // If command string starts with "cd"
     //  then run one of the following commands 
@@ -303,10 +273,30 @@ int commandExec(char *input){
             return 1;
         } else {
             changeDRCIII(arg); // "cd <arg>" moves to whatever directory is specified
-            }
         }
         return 1;
+        }
 
+    // A forking portion for invalid command inputs
+    //  If commands will end in a "return 1;" for loop
+    //    running purposes and so they don't pass through
+    //      the forking portion and fill the terminal with 
+    //        errors
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        // Child
+        execlp(command, command, NULL);
+
+        // If exec fails:
+        printf("%s is not recognized\n", command);
+        exit(1);
+    } else if (pid > 0) {
+        wait(NULL);
+    } else {
+    perror("fork failed");
+    }    
+    return 1;
 }
 
 void shell_loop(){
@@ -316,9 +306,12 @@ void shell_loop(){
 
     while(1){
         printf("~$: ");
+        // Buffer, size of the buffer, stdin reads the line 
+        //  *If the user presse "Ctrl + D" exits the loop.
         if (getline(&input, &input_size, stdin) == -1)
             break;
 
+        // If the user uses the "exit" command, breaks said loop
         if (!commandExec(input)){
             break;
         } 
