@@ -19,31 +19,31 @@ Alancio Young
 
 5. To test..
     Cd:
-     1. cd (will default to home directory)
-     2. cd .. (will move up one directory)
-     3. cd ~ (will go to the home directory)
-     4. cd <destination> (will move to specified directory)
+     1. "cd" (will default to home directory)
+     2. "cd .." (will move up one directory)
+     3. "cd ~" (will go to the home directory)
+     4. "cd destination" (will move to specified directory)
 
     ls:
-     5. ls (will list the contents of the directory you're currently in)
+     5. "ls" or "ls arg" (will list the contents of the directory you're currently in or specified)
 
     chmod:
-     6. chmod <permission-numbers> (will change the file permission to whatever r, w, x number combination entered)
+     6. "chmod permission-numbers" (will change the file permission to whatever r, w, x number combination entered)
 
     pwd:
-     7. pwd (prints the current working directory)
+     7. "pwd" (prints the current working directory)
 
     mkdir:
-     8. mkdir <directory-name> (makes the specified directory in the current directory)
+     8. "mkdir directory-name" (makes the specified directory in the current directory)
 
     touch:
-     9. touch (makes a file in the current directory)
+     9. "touch file-name" (makes a file in the current directory)
 
     rmdir:
-     10. rmdir <directory-name> (removes the specified directory from the current directory)
+     10. "rmdir directory-name" (removes the specified directory from the current directory)
 
     rm:
-     11. rm (removes the given file if it is in the current directory)
+     11. "rm file-name" (removes the given file if it is in the current directory)
 
 6. Resources:
     1. geeksforgeeks.org -> for function and implementation help (ex. chdir)

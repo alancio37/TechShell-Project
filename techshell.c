@@ -7,9 +7,11 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+// Alancio Young
 
 // Function to remove the newline character at the end of the input string
 void stripNewline(char *input) {
+
     size_t len = strlen(input);
     if (len > 0 && input[len - 1] == '\n') {
         input[len - 1] = '\0'; // Remove the newline
@@ -18,6 +20,7 @@ void stripNewline(char *input) {
 
 // Get the current working directory
 void currentWD(){
+
     // allocate memory for our path
     char workDir[1024];
     //
@@ -30,6 +33,7 @@ void currentWD(){
 
 // Change directory (move up one)
 void changeDRC(){
+
     if (chdir("..") != 0) {
         perror("chdir");
         return;
@@ -39,6 +43,7 @@ void changeDRC(){
 
 // Change directory (home)
 void changeDRCII(){
+
     char *home = getenv("HOME");
     if (home == NULL) {
         printf("HOME environment variable not set\n");
@@ -88,6 +93,7 @@ void lsCom(const char *dir) {
 
 // CHMOD function
 void filePerms(char *modeStr, char *file){
+
     char *endptr;
 
     mode_t modeType = strtol(modeStr, &endptr, 8);
@@ -104,7 +110,9 @@ void filePerms(char *modeStr, char *file){
 
 // Create a file
 void fileCRT(char *filename){
+
     FILE *fp = fopen(filename, "a");
+
     if (fp == NULL){
         perror("Invalid\n");
     }
@@ -114,10 +122,10 @@ void fileCRT(char *filename){
 
 // Remove a directory
 void dirRMV(char *dir){
+
     if (rmdir(dir) == 0){
-        printf("Directory removed\n");
     } else {
-        printf("The specified directory may have contents within]\n");
+        printf("The specified directory may have contents within or does not exist\n");
 }
 }
 
@@ -128,7 +136,6 @@ void makeDir(char *dirName){
     val = mkdir(dirName, 0755);
 
     if (val == 0){
-        printf("Directory created\n");
     } else {
         printf("Cannot createa directory %s\n", dirName);
     }
@@ -136,8 +143,10 @@ void makeDir(char *dirName){
 
 // Remove a file
 void fileRMV(char *filename){
+
     if (remove(filename) == 0){
-        printf("File removed\n");
+    } else {
+        printf("File cannot be removed or does not exist\n");
     }
 }
 
@@ -155,7 +164,7 @@ int commandExec(char *input){
     //     *If nothing is typed, then the command is invalid
     char *command = strtok(input, " \n");
     if (command == NULL){
-        printf("Invalid Command\n");
+        perror("Invalid Command\n");
         return 0;
     } 
 
@@ -194,10 +203,10 @@ int commandExec(char *input){
     char *mode = strtok(NULL, " \n");
     char *file = strtok(NULL, " \n");
 
-    if (mode && file) {
+    if (mode && file) { // If the user enters both necessary inputs
         filePerms(mode, file);
         } else {
-        printf("Invalid input for chmod\n");
+        perror("Invalid input for chmod\n");
         }
         return 1;
     }   
@@ -278,10 +287,12 @@ int commandExec(char *input){
         }
 
     // A forking portion for invalid command inputs
-    //  If commands will end in a "return 1;" for loop
+    //  Unlike the beginning this will check for invalid input
+    //    not just if nothin gis entered
+    //  (If commands will end in a "return 1;" for loop
     //    running purposes and so they don't pass through
     //      the forking portion and fill the terminal with 
-    //        errors
+    //        errors)
     pid_t pid = fork();
 
     if (pid == 0) {
@@ -308,6 +319,8 @@ void shell_loop(){
     while(1){
         printf("~$: ");
         // Buffer, size of the buffer, stdin reads the line 
+        //  getline() automatically resizes the buffer to the 
+        //    necessary size
         //  *If the user presse "Ctrl + D" exits the loop.
         if (getline(&input, &input_size, stdin) == -1)
             break;
