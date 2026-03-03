@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 
 // Alancio Young
 
@@ -19,15 +20,13 @@ void stripNewline(char *input) {
     }
 
 // Get the current working directory
-void currentWD(){
-
-    // allocate memory for our path
-    char workDir[1024];
-    //
-    if (getcwd(workDir, sizeof(workDir)) != NULL){
-        printf("%s\n", workDir);
+char* currentWD() {
+    static char workDir[1024];  
+    if (getcwd(workDir, sizeof(workDir)) != NULL) {
+        return workDir;  
     } else {
         perror("getcwd");
+        return NULL;  
     }
 }
 
@@ -65,91 +64,6 @@ void changeDRCIII(const char *spcdir){
     }
 }
 
-// List the contents of a directory
-void lsCom(const char *dir) {
-
-    struct dirent *d;
-    DIR *dh = opendir(dir);
-
-    if (!dh) {
-        return;
-    }
-
-    int found = 0;
-    while ((d = readdir(dh)) != NULL) {
-        // Skip "." and ".."
-        if (strcmp(d->d_name, ".") != 0 && strcmp(d->d_name, "..") != 0) {
-            printf("%s\n", d->d_name);  // Print the file or directory name
-            found = 1;
-        }
-    }
-
-    if (!found) {
-        printf("The directory is empty or no files found\n");
-    }
-
-    closedir(dh);
-}
-
-// CHMOD function
-void filePerms(char *modeStr, char *file){
-
-    char *endptr;
-
-    mode_t modeType = strtol(modeStr, &endptr, 8);
-
-    if (*endptr != '\0'){
-        fprintf(stderr, "Invalid input: %s\n", modeStr);
-        return;
-    }
-
-    if (chmod(file, modeType) == -1){
-        perror("chmod failed");
-    }
-}
-
-// Create a file
-void fileCRT(char *filename){
-
-    FILE *fp = fopen(filename, "a");
-
-    if (fp == NULL){
-        perror("Invalid\n");
-    }
-
-    fclose(fp);
-}
-
-// Remove a directory
-void dirRMV(char *dir){
-
-    if (rmdir(dir) == 0){
-    } else {
-        printf("The specified directory may have contents within or does not exist\n");
-}
-}
-
-// Make a directory
-void makeDir(char *dirName){
-    
-    int val = 0;
-    val = mkdir(dirName, 0755);
-
-    if (val == 0){
-    } else {
-        printf("Cannot createa directory %s\n", dirName);
-    }
-}
-
-// Remove a file
-void fileRMV(char *filename){
-
-    if (remove(filename) == 0){
-    } else {
-        printf("File cannot be removed or does not exist\n");
-    }
-}
-
 // Exit the terminal
 void exitCmd(){
     exit(0);
@@ -168,26 +82,6 @@ int commandExec(char *input){
         return 0;
     } 
 
-    // If command string is pwd
-    //  then run the getcwd function
-    if (strcmp(command, "pwd") == 0){
-        currentWD();
-        return 1;
-    }
-
-    // If the command enter is "ls" or
-    //  "ls <argument>"
-    if (strcmp(command, "ls") == 0) {
-        // Check for an argument for "ls"
-        char *arg = strtok(NULL, " \n");  // Get the argument after "ls"
-        if (arg == NULL) {
-            lsCom(".");  // Default to current directory if no argument
-        } else {
-            lsCom(arg);  // List the contents of the directory passed as argument
-        }
-        return 1; // So fork
-    }
-
     // If command is "exit" then run 
     //  the exit function or if the 
     //    command is invalid for some reason,
@@ -196,73 +90,6 @@ int commandExec(char *input){
         exitCmd();
         return 1;
     } 
-
-    // If the "chmod <argument>" is entered
-    //  then initiate the CHMOD function
-    if (strcmp(command, "chmod") == 0) {
-    char *mode = strtok(NULL, " \n");
-    char *file = strtok(NULL, " \n");
-
-    if (mode && file) { // If the user enters both necessary inputs
-        filePerms(mode, file);
-        } else {
-        perror("Invalid input for chmod\n");
-        }
-        return 1;
-    }   
-
-    // If "mkdir <file-name>" is entered,
-    //  then initiate the makeDir function
-    if (strcmp(command, "mkdir") == 0){
-        char *arg = strtok(NULL, " \n");
-
-        if (arg == NULL){
-            perror("That directory could not be created\n");
-        } else {
-            makeDir(arg);
-        }
-        return 1;
-    }
-
-    // if "touch <filename.type> is entered,
-    //  create a file within the current directory
-    if (strcmp(command, "touch") == 0){
-        char *arg = strtok(NULL, " \n");
-
-        if (arg == NULL){
-            perror("File could not be created\n");
-        } else {
-            fileCRT(arg);
-        }
-        return 1;
-    }
-
-    // If "rmdir <specified_directory>" is entered,
-    //  then remove that specified directory
-    if (strcmp(command, "rmdir") == 0){
-        char *arg = strtok(NULL, " \n");
-
-        if (arg == NULL){
-            perror("Could not remove that directory\n");
-        } else {
-            dirRMV(arg);
-        }       
-        return 1;
-    }
-
-    // If "rm <file-name>" is entered, then remove that
-    //  file from where it is
-    if (strcmp(command, "rm") == 0){
-        char *arg = strtok(NULL, " \n");
-
-        if (arg == NULL){
-            perror("Invalid input\n");
-        } else {
-            fileRMV(arg);
-        }
-        return 1;
-    }
-
 
     // If command string starts with "cd"
     //  then run one of the following commands 
@@ -286,23 +113,67 @@ int commandExec(char *input){
         return 1;
         }
 
-    // A forking portion for invalid command inputs
-    //  Unlike the beginning this will check for invalid input
-    //    not just if nothin gis entered
-    //  (If commands will end in a "return 1;" for loop
-    //    running purposes and so they don't pass through
-    //      the forking portion and fill the terminal with 
-    //        errors)
+    char *args[100];
+    int i = 0;
+
+    char *file1 = NULL;
+    char *file2 = NULL;
+
+    args[i++] = command;
+
+    char *arg;
+    while ((arg = strtok(NULL, " \n")) != NULL){
+        if (strcmp(arg, "<") == 0){
+
+            file1 = strtok(NULL, " \n");
+
+        } else if (strcmp(arg, ">") == 0){
+
+            file2 = strtok(NULL, " \n");
+
+        } else {
+
+            args[i++] = arg;
+
+        }
+    }
+
+    args[i] = NULL;
+
     pid_t pid = fork();
 
     if (pid == 0) {
-        // Child
-        execlp(command, command, NULL);
 
-        // If exec fails:
-        printf("%s is not recognized\n", command);
+        // Input redirection
+        if (file1 != NULL){
+            int file_1 = open(file1, O_RDONLY);
+            if (file_1 < 0){
+                perror("open input");
+                exit(1);
+            }
+            dup2(file_1, STDIN_FILENO);
+            close(file_1);
+        }
+
+        // Output redirection
+        if (file2 != NULL){
+            int file_2 = open(file2, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            if (file_2 < 0){
+                perror("open output");
+                exit(1);
+            }
+            dup2(file_2, STDERR_FILENO);
+            close(file_2);
+        }
+
+
+        // Child
+        execvp(command, args);
+        fprintf(stderr, "Error %d (%s)\n",
+            errno,
+            strerror(errno));
         exit(1);
-    } else if (pid > 0) {
+    } else if (pid > 0){
         wait(NULL);
     } else {
     perror("fork failed");
@@ -317,7 +188,9 @@ void shell_loop(){
     ssize_t input_size = 0;
 
     while(1){
-        printf("~$: ");
+        char *cwd = currentWD();
+
+        printf("%s $: ", cwd);
         // Buffer, size of the buffer, stdin reads the line 
         //  getline() automatically resizes the buffer to the 
         //    necessary size
