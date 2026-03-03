@@ -6,7 +6,7 @@ Alancio Young
     functions/commands and how they worked, how I can incorporate those into my program, and putting the program together in general.
 
 3. The project is a simple bash shell written in C that performs basic actions to files.
-    Some of those things may include, and not be limited to, mkdir, touch, rmdir, rm, and chmod. Although not these commands may not be implemented in the most detailed way, they perform their intended use at base level like they would in an actual bash terminal.
+    Some of those things may include, and not be limited to, mkdir, touch, rmdir, rm, and chmod through the use of execvp. Although not these commands may not be implemented in the most detailed way, they perform their intended use at base level like they would in an actual bash terminal.
 
 4. For information on how to use the file >
     1. First in your terminal (and also ensuring you are in the corect directory)
@@ -24,26 +24,8 @@ Alancio Young
      3. "cd ~" (will go to the home directory)
      4. "cd destination" (will move to specified directory)
 
-    ls:
-     5. "ls" or "ls arg" (will list the contents of the directory you're currently in or specified)
-
-    chmod:
-     6. "chmod permission-numbers" (will change the file permission to whatever r, w, x number combination entered)
-
-    pwd:
-     7. "pwd" (prints the current working directory)
-
-    mkdir:
-     8. "mkdir directory-name" (makes the specified directory in the current directory)
-
-    touch:
-     9. "touch file-name" (makes a file in the current directory)
-
-    rmdir:
-     10. "rmdir directory-name" (removes the specified directory from the current directory)
-
-    rm:
-     11. "rm file-name" (removes the given file if it is in the current directory)
+    Exit:
+     1. "exit" (will just exit the terminal)
 
 6. Resources:
     1. geeksforgeeks.org -> for function and implementation help (ex. chdir)

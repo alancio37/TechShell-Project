@@ -113,6 +113,7 @@ int commandExec(char *input){
         return 1;
         }
 
+    // For the purpose of stdin and stdout
     char *args[100];
     int i = 0;
 
@@ -122,28 +123,30 @@ int commandExec(char *input){
     args[i++] = command;
 
     char *arg;
+    // If there's argument parsing after the command
     while ((arg = strtok(NULL, " \n")) != NULL){
+        // Checks to see if the < (stdin) was entered
         if (strcmp(arg, "<") == 0){
-
+            // If so, parse the argument after that
             file1 = strtok(NULL, " \n");
-
-        } else if (strcmp(arg, ">") == 0){
-
+        } 
+        // Checks if the > (stdout) was entered
+        else if (strcmp(arg, ">") == 0){
+            // If so, parse the argument entered after that
             file2 = strtok(NULL, " \n");
-
         } else {
-
+            //
             args[i++] = arg;
 
         }
     }
 
+    // Forking stuff
     args[i] = NULL;
 
     pid_t pid = fork();
 
     if (pid == 0) {
-
         // Input redirection
         if (file1 != NULL){
             int file_1 = open(file1, O_RDONLY);
@@ -162,21 +165,26 @@ int commandExec(char *input){
                 perror("open output");
                 exit(1);
             }
-            dup2(file_2, STDERR_FILENO);
+            dup2(file_2, STDOUT_FILENO);
             close(file_2);
         }
 
 
-        // Child
+        // Child process
+        // Gets the command and arguments entered and
+        //  runs the appropriate bash commands
         execvp(command, args);
-        fprintf(stderr, "Error %d (%s)\n",
-            errno,
-            strerror(errno));
+        // If the user input is invalid, return the error number using
+        //  errno
+        fprintf(stderr, "Error %d (%s)\n", errno, strerror(errno));
         exit(1);
     } else if (pid > 0){
+        // Parent process
+        // Waits for the child process to finish before proceeding
         wait(NULL);
     } else {
-    perror("fork failed");
+        // Error message for if forking fails
+        perror("fork failed");
     }    
     return 1;
 }
